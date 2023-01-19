@@ -22,6 +22,7 @@ public class Cliente {
 	private Long id;
 	@Column(name = "nome")
 	private String nome;
+	
 	private String email;
 	@Column(name = "telefone")
 	private String telefone;
