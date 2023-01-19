@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.algaworks.algalog.domain.model.Cliente;
 import com.algaworks.algalog.domain.repository.ClienteRepository;
+import com.algaworks.algalog.domain.service.CatalogoClienteService;
 
 import lombok.AllArgsConstructor;
 
@@ -30,6 +31,7 @@ public class ClienteController {
 
 	@Autowired
 	private ClienteRepository repository;
+	private CatalogoClienteService catalogoClienteService;
 	
 	@GetMapping
 	public List<Cliente> listar() {
@@ -47,7 +49,7 @@ public class ClienteController {
 	@PostMapping
 	@ResponseStatus(code = HttpStatus.CREATED)
 	public Cliente adicionar(@Valid @RequestBody Cliente cliente) {
-		return repository.save(cliente);
+		return catalogoClienteService.salvar(cliente);
 	}
 	
 	@PutMapping("/{id}")
@@ -59,7 +61,7 @@ public class ClienteController {
 		 * objeto cliente, para forçar uma atualização */
 		cliente.setId(id); 
 		
-		repository.save(cliente);
+		catalogoClienteService.salvar(cliente);
 		return ResponseEntity.ok(cliente);
 	}
 	
@@ -68,7 +70,8 @@ public class ClienteController {
 		if(!repository.existsById(id)) {
 			return ResponseEntity.notFound().build();
 		}
-		repository.deleteById(id);
+		
+		catalogoClienteService.excluir(id);
 		
 		/*noContent é o codigo 204 para quando for sucesso e n existir um corpo na resposta*/
 		return ResponseEntity.noContent().build();
