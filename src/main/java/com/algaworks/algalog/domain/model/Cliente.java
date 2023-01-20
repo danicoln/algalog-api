@@ -22,8 +22,6 @@ import lombok.Setter;
 @Entity
 public class Cliente {
 
-	
-	@NotNull(groups = ValidationGroups.ClienteId.class)
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,8 +37,5 @@ public class Cliente {
 	@Size(max = 20)
 	@NotBlank
 	private String telefone;
-	
-	
-	
 	
 }
