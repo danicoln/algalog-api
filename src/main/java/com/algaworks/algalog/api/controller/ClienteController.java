@@ -1,7 +1,6 @@
 package com.algaworks.algalog.api.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -18,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.algaworks.algalog.domain.model.Cliente;
+import com.algaworks.algalog.api.dto.ClienteDto;
+import com.algaworks.algalog.api.dto.input.ClienteInput;
+import com.algaworks.algalog.api.mapper.ClienteMapper;
 import com.algaworks.algalog.domain.repository.ClienteRepository;
 import com.algaworks.algalog.domain.service.CatalogoClienteService;
 
@@ -32,58 +33,53 @@ public class ClienteController {
 	@Autowired
 	private ClienteRepository repository;
 	private CatalogoClienteService catalogoClienteService;
-	
+	private ClienteMapper clienteMapper;
+
 	@GetMapping
-	public List<Cliente> listar() {
-		return repository.findAll();
+	public List<ClienteDto> listar() {
+		return clienteMapper.toCollectionDto(repository.findAll());
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Cliente> buscar(@PathVariable Long id) {
-		return repository.findById(id)
-//				.map(c -> ResponseEntity.ok(c))
-				.map(ResponseEntity::ok) //esta linha substitui a anterior
+	public ResponseEntity<ClienteDto> buscar(@PathVariable Long id) {
+		return repository.findById(id).map(cliente -> ResponseEntity.ok(clienteMapper.toDto(cliente)))
 				.orElse(ResponseEntity.notFound().build());
+
 	}
 
 	@PostMapping
 	@ResponseStatus(code = HttpStatus.CREATED)
-	public Cliente adicionar(@Valid @RequestBody Cliente cliente) {
-		return catalogoClienteService.salvar(cliente);
+	public ClienteDto adicionar(@Valid @RequestBody ClienteInput input) {
+		return clienteMapper.adicionar(input);
 	}
-	
+
 	@PutMapping("/{id}")
-	public ResponseEntity<Cliente> atualizar(@Valid @PathVariable Long id, @RequestBody Cliente cliente){
-		if(!repository.existsById(id)) {
+	public ResponseEntity<ClienteDto> atualizar(@Valid @PathVariable Long id, @RequestBody ClienteInput input) {
+		if (!repository.existsById(id)) {
 			return ResponseEntity.notFound().build();
 		}
-		/* para que o método não crie um novo cliente, é necessário atribuir o id ao
-		 * objeto cliente, para forçar uma atualização */
-		cliente.setId(id); 
-		
-		catalogoClienteService.salvar(cliente);
-		return ResponseEntity.ok(cliente);
+		/*
+		 * para que o método não crie um novo cliente, é necessário atribuir o id ao
+		 * objeto cliente, para forçar uma atualização
+		 */
+		input.setId(id);
+
+		return ResponseEntity.ok(clienteMapper.atualizar(id, input));
 	}
-	
+
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> remover(@PathVariable Long id){
-		if(!repository.existsById(id)) {
+	public ResponseEntity<Void> remover(@PathVariable Long id) {
+		if (!repository.existsById(id)) {
 			return ResponseEntity.notFound().build();
 		}
-		
+
 		catalogoClienteService.excluir(id);
-		
-		/*noContent é o codigo 204 para quando for sucesso e n existir um corpo na resposta*/
+
+		/*
+		 * noContent é o codigo 204 para quando for sucesso e n existir um corpo na
+		 * resposta
+		 */
 		return ResponseEntity.noContent().build();
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 }
